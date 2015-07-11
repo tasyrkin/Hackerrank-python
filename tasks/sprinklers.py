@@ -3,6 +3,7 @@ __author__ = 'tim'
 #wrong solution :(
 
 import shlex
+import bisect
 
 tokenizer = shlex.shlex(posix=True)
 tokenizer.whitespace_split=True
@@ -36,20 +37,27 @@ while T > 0:
     selected_I = -1
     selected_sprinkles = -1
 
-    print all_vacant
-
-    for I in range((N-1)/2 + (1 if (N-1)%2 != 0 else 1) + 1):
+    for I in range(N):
         roses_covered = 2*I + 1
         curr_sprlinkles = N/roses_covered + (1 if N%roses_covered>0 else 0)
-        curr_price = I*Q +  curr_sprlinkles * S
+        curr_price = I*Q + curr_sprlinkles*S
         if left_items <= I and right_items <= I and max_gap <= 2 * I and curr_sprlinkles <= M:
             ok = curr_sprlinkles != 1 or (I in all_vacant or (N-I-1) in all_vacant)
-            print 'ok={}, curr_sprlinkles={}, I={}'.format(ok, curr_sprlinkles, I)
             if ok and min_price > curr_price:
                 min_price = curr_price
                 selected_I = I
                 selected_sprinkles = curr_sprlinkles
 
     print selected_sprinkles, selected_I
-    print 'Need arrangement'
+    chosen_positions = []
+    prev_position = -1
+    for curr_sprinkle in range(selected_sprinkles):
+        diff = selected_I if curr_sprinkle == 0 else 2 * selected_I
+        curr_position = prev_position + diff + 1
+        found_index = bisect.bisect_left(vacant, curr_position)
+        if vacant[found_index] != curr_position:
+            found_index = found_index - 1
+        chosen_positions.append(vacant[found_index]+1)
+        prev_position = vacant[found_index]
+    print ' '.join([str(i) for i in chosen_positions])
 
